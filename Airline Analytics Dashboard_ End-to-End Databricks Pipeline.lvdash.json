@@ -1,0 +1,347 @@
+{
+  "datasets": [
+    {
+      "name": "00107b0e",
+      "displayName": "State Airport Summary",
+      "queryLines": [
+        "SELECT\n",
+        "  STATE AS state,\n",
+        "  COUNT(*) AS total_airports,\n",
+        "  COUNT(DISTINCT CITY) AS total_cities\n",
+        "FROM\n",
+        "  workspace.bronze.gold_dim_airports\n",
+        "GROUP BY\n",
+        "  STATE\n",
+        "ORDER BY\n",
+        "  total_airports DESC\n",
+        "LIMIT 10"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "state_summary",
+      "displayName": "Top 10 States by Airports",
+      "queryLines": [
+        "SELECT\n",
+        "  STATE AS state,\n",
+        "  COUNT(*) AS total_airports,\n",
+        "  COUNT(DISTINCT CITY) AS total_cities\n",
+        "FROM\n",
+        "  workspace.bronze.gold_dim_airports\n",
+        "GROUP BY\n",
+        "  STATE\n",
+        "ORDER BY\n",
+        "  total_airports DESC\n",
+        "LIMIT 10"
+      ]
+    },
+    {
+      "name": "e24a96e9",
+      "displayName": "State Airport Summary",
+      "queryLines": [
+        "SELECT\r\n",
+        "  STATE AS state,\r\n",
+        "  COUNT(*) AS total_airports,\r\n",
+        "  COUNT(DISTINCT CITY) AS total_cities\r\n",
+        "FROM\r\n",
+        "  workspace.bronze.gold_dim_airports\r\n",
+        "GROUP BY\r\n",
+        "  STATE\r\n",
+        "ORDER BY\r\n",
+        "  total_airports DESC"
+      ],
+      "catalog": "workspace",
+      "schema": "gold"
+    },
+    {
+      "name": "a2a1e3f4",
+      "displayName": "Airport Locations",
+      "queryLines": [
+        "SELECT\r\n",
+        "  airport_name,\r\n",
+        "  latitude,\r\n",
+        "  longitude\r\n",
+        "FROM\r\n",
+        "  workspace.bronze.gold_dim_airports\r\n",
+        "WHERE\r\n",
+        "  latitude IS NOT NULL\r\n",
+        "  AND longitude IS NOT NULL"
+      ]
+    },
+    {
+      "name": "72d7cabf",
+      "displayName": "California Airport Details Extract",
+      "queryLines": [
+        "-- Display airports in California for dashboard visualization as a table graph\r\n",
+        "SELECT airport_code, airport_name, CITY, STATE, COUNTRY, latitude, longitude\r\n",
+        "FROM workspace.bronze.gold_dim_airports\r\n",
+        "WHERE STATE = 'CA'\r\n",
+        "-- To visualize as a table graph, use Databricks' built-in visualization options after running this query"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "6cc11bc4",
+      "displayName": "Airport",
+      "layout": [
+        {
+          "widget": {
+            "name": "state_bar_chart",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "state_summary",
+                  "fields": [
+                    {
+                      "name": "state",
+                      "expression": "`state`"
+                    },
+                    {
+                      "name": "sum(total_airports)",
+                      "expression": "SUM(`total_airports`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Top 10 States by Airport Count",
+                "showTitle": true
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "state",
+                  "displayName": "state",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(total_airports)",
+                  "displayName": "total_airports",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "state",
+                  "displayName": "state",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "state_table",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "state_summary",
+                  "fields": [
+                    {
+                      "name": "state",
+                      "expression": "`state`"
+                    },
+                    {
+                      "name": "total_airports",
+                      "expression": "`total_airports`"
+                    },
+                    {
+                      "name": "total_cities",
+                      "expression": "`total_cities`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "title": "State Airport Details",
+                "showTitle": true
+              },
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "state"
+                  },
+                  {
+                    "fieldName": "total_airports"
+                  },
+                  {
+                    "fieldName": "total_cities"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "airport_map",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a2a1e3f4",
+                  "fields": [
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    },
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "Airport Locations Map",
+                "showTitle": true
+              },
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "longitude",
+                  "displayName": "Longitude",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "latitude",
+                  "displayName": "Latitude",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "58b89559",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "72d7cabf",
+                  "fields": [
+                    {
+                      "name": "CITY",
+                      "expression": "`CITY`"
+                    },
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    },
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "title": "California Airports",
+                "showTitle": true
+              },
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "longitude",
+                  "displayName": "Longitude",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "latitude",
+                  "displayName": "Latitude",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "CITY",
+                  "displayName": "City",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 11,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
